@@ -1,0 +1,22 @@
+app:
+  isDev: true
+  isTesting: false
+  logLevel: debug
+postgres:
+  host: localhost
+  port: 5434
+  user: postgres
+  password: postgres
+  database: zero-manga
+server:
+  host: 0.0.0.0
+  port: 8000
+jwt:
+  secret: secret
+  accessTokenTTL: 6h
+  refreshTokenTTL: 12h
+  issuer: zero-manga
+fileStorage:
+  storagePath: ./storage
+  host: 0.0.0.0
+  port: 9000
