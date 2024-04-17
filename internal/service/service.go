@@ -21,9 +21,16 @@ type User interface {
 	GetAll(ctx context.Context, pagination models.Pagination) ([]models.User, models.FullPagination, error)
 }
 
+type Chat interface {
+	GetAll(ctx context.Context, pagination models.Pagination) ([]models.Chat, models.FullPagination, error)
+	GetByID(ctx context.Context, id int64) (models.Chat, error)
+	Create(ctx context.Context, input models.CreateChatInput) error
+}
+
 type Services struct {
 	User
 	Authorization
+	Chat
 }
 
 func New(
@@ -36,5 +43,6 @@ func New(
 	return &Services{
 		User:          NewUserService(repository.User),
 		Authorization: NewAuthorizationSerive(jwt, repository.User),
+		Chat:          NewChatService(repository.Chat),
 	}
 }

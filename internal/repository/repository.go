@@ -14,12 +14,20 @@ type User interface {
 	GetAll(ctx context.Context, pagination models.DBPagination) ([]models.User, uint64, error)
 }
 
+type Chat interface {
+	Create(ctx context.Context, chat models.CreateChatRecord) error
+	GetByID(ctx context.Context, id int64) (models.Chat, error)
+	GetAll(ctx context.Context, pagination models.DBPagination) ([]models.Chat, uint64, error)
+}
+
 type Repository struct {
 	User
+	Chat
 }
 
 func New(psql postgresql.PostgresqlRepository, logger logger.Logger) *Repository {
 	return &Repository{
 		User: postgresql.NewUser(psql.DB),
+		Chat: postgresql.NewChat(psql.DB),
 	}
 }

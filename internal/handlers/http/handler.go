@@ -69,8 +69,15 @@ func (h *Handler) initRoutes() {
 	user := v1.Group("/users", h.Authorized())
 	{
 		user.GET("", h.getAllUsers, h.WithPagination(), h.RequireUserType(models.UserTypeAdmin))
-		user.GET("/id/:id", h.getUserByID)
+		user.GET("/:id", h.getUserByID)
 		user.GET("/self", h.getSelfUser)
+	}
+
+	chat := v1.Group("/chats", h.Authorized())
+	{
+		chat.GET("", h.getAllChats, h.WithPagination())
+		chat.POST("", h.createChat, h.RequireUserType(models.UserTypeAdmin))
+		chat.GET("/:id", h.getChatByID)
 	}
 }
 

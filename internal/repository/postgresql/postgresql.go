@@ -13,6 +13,7 @@ import (
 
 const (
 	UsersTable = "users"
+	ChatsTable = "chats"
 )
 
 func GetPgError(err error) *pgconn.PgError {
