@@ -84,3 +84,65 @@ func (h *Handler) getChatByID(ctx echo.Context) error {
 
 	return nil
 }
+
+type joinChatRequest struct {
+	ChatID   int64  `json:"chat_id"`
+	Password string `json:"password"`
+}
+
+func (h *Handler) joinChat(ctx echo.Context) error {
+	var req joinChatRequest
+	if err := ctx.Bind(&req); err != nil {
+		return h.newValidationErrorResponse(ctx, http.StatusBadRequest, err)
+	}
+
+	user, ok := ctx.Get("user").(models.User)
+	if !ok {
+		return h.newAppErrorResponse(ctx, errors.New("invalid user in context"))
+	}
+
+	err := h.services.Chat.JoinUser(ctx.Request().Context(), req.ChatID, user.ID, req.Password)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrChatNotFound):
+			return h.newErrorResponse(ctx, http.StatusNotFound, models.ErrChatNotFound.Error())
+		case errors.Is(err, models.ErrChatWrongPassword):
+			return h.newErrorResponse(ctx, http.StatusForbidden, models.ErrChatWrongPassword.Error())
+		case errors.Is(err, models.ErrChatNotPrivate):
+			return h.newErrorResponse(ctx, http.StatusForbidden, models.ErrChatNotPrivate.Error())
+		case errors.Is(err, models.ErrChatAlreadyJoined):
+			return h.newErrorResponse(ctx, http.StatusConflict, models.ErrChatAlreadyJoined.Error())
+		}
+
+		return h.newAppErrorResponse(ctx, err)
+	}
+
+	ctx.NoContent(http.StatusOK)
+
+	return nil
+}
+
+type leaveChatRequest struct {
+	ChatID int64 `json:"chat_id"`
+}
+
+func (h *Handler) leaveChat(ctx echo.Context) error {
+	var req leaveChatRequest
+	if err := ctx.Bind(&req); err != nil {
+		return h.newValidationErrorResponse(ctx, http.StatusBadRequest, err)
+	}
+
+	user, ok := ctx.Get("user").(models.User)
+	if !ok {
+		return h.newAppErrorResponse(ctx, errors.New("invalid user in context"))
+	}
+
+	err := h.services.Chat.LeaveUser(ctx.Request().Context(), req.ChatID, user.ID)
+	if err != nil {
+		return h.newAppErrorResponse(ctx, err)
+	}
+
+	ctx.NoContent(http.StatusOK)
+
+	return nil
+}

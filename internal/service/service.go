@@ -25,6 +25,8 @@ type Chat interface {
 	GetAll(ctx context.Context, pagination models.Pagination) ([]models.Chat, models.FullPagination, error)
 	GetByID(ctx context.Context, id int64) (models.Chat, error)
 	Create(ctx context.Context, input models.CreateChatInput) error
+	JoinUser(ctx context.Context, chatID int64, userID int64, password string) error
+	LeaveUser(ctx context.Context, chatID int64, userID int64) error
 }
 
 type Services struct {

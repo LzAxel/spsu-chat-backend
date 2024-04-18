@@ -18,6 +18,8 @@ type Chat interface {
 	Create(ctx context.Context, chat models.CreateChatRecord) error
 	GetByID(ctx context.Context, id int64) (models.Chat, error)
 	GetAll(ctx context.Context, pagination models.DBPagination) ([]models.Chat, uint64, error)
+	JoinUser(ctx context.Context, chatID int64, userID int64) error
+	LeaveUser(ctx context.Context, chatID int64, userID int64) error
 }
 
 type Repository struct {

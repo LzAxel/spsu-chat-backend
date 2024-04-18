@@ -13,8 +13,11 @@ const (
 )
 
 var (
-	ErrChatNotFound     = errors.New("chat not found")
-	ErrChatNameTooShort = errors.New("chat name is too short")
+	ErrChatNotFound      = errors.New("chat not found")
+	ErrChatNameTooShort  = errors.New("chat name is too short")
+	ErrChatNotPrivate    = errors.New("chat is not private")
+	ErrChatWrongPassword = errors.New("wrong chat password")
+	ErrChatAlreadyJoined = errors.New("you are already joined this chat")
 )
 
 type ChatType int8

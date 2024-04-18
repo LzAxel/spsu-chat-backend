@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"errors"
 
+	"spsu-chat/internal/apperror"
 	"spsu-chat/internal/models"
 	"spsu-chat/internal/repository"
 	"spsu-chat/pkg/clock"
@@ -58,4 +60,27 @@ func (c *ChatService) GetAll(ctx context.Context, pagination models.Pagination) 
 	})
 
 	return chats, pagination.GetFull(total), err
+}
+
+func (c *ChatService) JoinUser(ctx context.Context, chatID int64, userID int64, password string) error {
+	chat, err := c.repo.GetByID(ctx, chatID)
+	if err != nil {
+		if errors.Is(err, apperror.ErrNotFound) {
+			return models.ErrChatNotFound
+		}
+		return err
+	}
+
+	if chat.Type != models.ChatTypePrivate {
+		return models.ErrChatNotPrivate
+	}
+
+	if err := hash.Compare(chat.PasswordHash, password); err != nil {
+		return models.ErrChatWrongPassword
+	}
+
+	return c.repo.JoinUser(ctx, chatID, userID)
+}
+func (c *ChatService) LeaveUser(ctx context.Context, chatID int64, userID int64) error {
+	return c.repo.LeaveUser(ctx, chatID, userID)
 }

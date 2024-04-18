@@ -78,6 +78,8 @@ func (h *Handler) initRoutes() {
 		chat.GET("", h.getAllChats, h.WithPagination())
 		chat.POST("", h.createChat, h.RequireUserType(models.UserTypeAdmin))
 		chat.GET("/:id", h.getChatByID)
+		chat.POST("/join", h.joinChat)
+		chat.POST("/leave", h.leaveChat)
 	}
 }
 

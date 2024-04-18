@@ -8,6 +8,7 @@ import (
 	"spsu-chat/internal/models"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgerrcode"
 )
 
 type ChatPosgresql struct {
@@ -82,6 +83,61 @@ func (p *ChatPosgresql) GetByID(ctx context.Context, id int64) (models.Chat, err
 	}
 
 	return chat, nil
+}
+
+func (p *ChatPosgresql) JoinUser(ctx context.Context, chatID int64, userID int64) error {
+	query, args, _ := squirrel.
+		Insert(ChatUsersTable).
+		Columns(
+			"chat_id",
+			"user_id",
+		).
+		Values(
+			chatID,
+			userID,
+		).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+		pgErr := GetPgError(err)
+
+		switch {
+		case pgErr != nil && pgErr.Code == pgerrcode.UniqueViolation:
+			return models.ErrChatAlreadyJoined
+		case errors.Is(err, sql.ErrNoRows):
+			return apperror.ErrNotFound
+		}
+
+		return apperror.NewDBError(
+			err,
+			"Chat",
+			"JoinUser",
+			query,
+			args,
+		)
+	}
+
+	return nil
+}
+func (p *ChatPosgresql) LeaveUser(ctx context.Context, chatID int64, userID int64) error {
+	query, args, _ := squirrel.
+		Delete(ChatUsersTable).
+		Where(squirrel.Eq{"chat_id": chatID, "user_id": userID}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if _, err := p.db.ExecContext(ctx, query, args...); err != nil {
+		return apperror.NewDBError(
+			err,
+			"Chat",
+			"LeaveUser",
+			query,
+			args,
+		)
+	}
+
+	return nil
 }
 
 func (p *ChatPosgresql) GetAll(ctx context.Context, pagination models.DBPagination) ([]models.Chat, uint64, error) {
