@@ -183,3 +183,30 @@ func (p *ChatPosgresql) GetAll(ctx context.Context, pagination models.DBPaginati
 
 	return chats, count, nil
 }
+
+func (p *ChatPosgresql) IsUserInChat(ctx context.Context, chatID, userID int64) (bool, error) {
+	query, args, _ := squirrel.
+		Select("user_id").
+		From(ChatUsersTable).
+		Where(squirrel.Eq{"user_id": userID, "chat_id": chatID}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	var returnedUserID int64
+	if err := p.db.GetContext(ctx, &returnedUserID, query, args...); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return false, nil
+		default:
+			return false, apperror.NewDBError(
+				err,
+				"Chat",
+				"GetByID",
+				query,
+				args,
+			)
+		}
+	}
+
+	return true, nil
+}

@@ -15,6 +15,7 @@ const (
 	UsersTable     = "users"
 	ChatsTable     = "chats"
 	ChatUsersTable = "chat_users"
+	MessagesTable  = "messages"
 )
 
 func GetPgError(err error) *pgconn.PgError {

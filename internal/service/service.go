@@ -29,10 +29,17 @@ type Chat interface {
 	LeaveUser(ctx context.Context, chatID int64, userID int64) error
 }
 
+type Message interface {
+	Create(ctx context.Context, message models.CreateMessageInput) error
+	GetAll(ctx context.Context, pagination models.Pagination, filters models.GetMessagesFilters, userID int64) ([]models.Message, uint64, error)
+	Delete(ctx context.Context, userID int64, messageID int64) error
+}
+
 type Services struct {
 	User
 	Authorization
 	Chat
+	Message
 }
 
 func New(
@@ -46,5 +53,6 @@ func New(
 		User:          NewUserService(repository.User),
 		Authorization: NewAuthorizationSerive(jwt, repository.User),
 		Chat:          NewChatService(repository.Chat),
+		Message:       NewMessageService(repository.Message, repository.Chat),
 	}
 }

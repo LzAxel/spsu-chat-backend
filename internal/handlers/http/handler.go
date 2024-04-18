@@ -81,6 +81,12 @@ func (h *Handler) initRoutes() {
 		chat.POST("/join", h.joinChat)
 		chat.POST("/leave", h.leaveChat)
 	}
+	message := v1.Group("/messages", h.Authorized())
+	{
+		message.GET("", h.getAllMessages, h.WithPagination())
+		message.POST("", h.SendMessage)
+		message.DELETE("/:id", h.DeleteMessage)
+	}
 }
 
 func (h *Handler) Stop(ctx context.Context) error {

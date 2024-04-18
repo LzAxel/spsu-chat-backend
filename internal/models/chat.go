@@ -18,6 +18,7 @@ var (
 	ErrChatNotPrivate    = errors.New("chat is not private")
 	ErrChatWrongPassword = errors.New("wrong chat password")
 	ErrChatAlreadyJoined = errors.New("you are already joined this chat")
+	ErrChatNotJoined     = errors.New("you are not joined this chat")
 )
 
 type ChatType int8
